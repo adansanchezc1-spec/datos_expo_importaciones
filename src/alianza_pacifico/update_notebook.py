@@ -219,41 +219,19 @@ def build_notebook(root_dir: Path) -> None:
         )
     )
 
-    # Plotly Interactivo 1: Facet Grid de los 8 Productos Ofertados por Año y Socio
-    df_of_anual = anual_prod[anual_prod["tipo_canasta"] == "Canasta Ofertada"].copy()
-    fig_px_ofertados = px.bar(
-        df_of_anual,
-        x="anio",
-        y="expo_real_musd",
-        color="pais_nombre",
-        facet_col="producto_clave",
-        facet_col_wrap=2,
-        barmode="stack",
-        height=950,
-        title="Desagregación Anual de los 8 Productos Ofertados (Exportaciones Reales de Colombia hacia Chile, México y Perú — MUSD Base 2013)",
-        labels={"anio": "Año", "expo_real_musd": "MUSD Exportados (Base 2013)", "pais_nombre": "Socio Destino"},
-        template="plotly_white",
-    )
-    fig_px_ofertados.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1][:52]))
-    fig_px_ofertados.update_yaxes(matches=None, showticklabels=True)
+    dash_data_all = DashboardDataRepository(processed_dir).load_all()
 
-    # Plotly Interactivo 2: Facet Grid de los 8 Productos Demandados por Año y Socio
-    df_dem_anual = anual_prod[anual_prod["tipo_canasta"] == "Canasta Demandada (Referencia)"].copy()
-    fig_px_demandados = px.bar(
-        df_dem_anual,
-        x="anio",
-        y="impo_real_musd",
-        color="pais_nombre",
-        facet_col="producto_clave",
-        facet_col_wrap=2,
-        barmode="stack",
-        height=950,
-        title="Desagregación Anual de los 8 Productos Demandados (Importaciones Reales de Colombia desde Chile, México y Perú — MUSD Base 2013)",
-        labels={"anio": "Año", "impo_real_musd": "MUSD Importados (Base 2013)", "pais_nombre": "Socio Origen"},
-        template="plotly_white",
+    # Plotly Interactivo 1: Desagregación de los 8 Productos Ofertados con Slicer de Bloques/Anual
+    df_of_anual = anual_prod[anual_prod["tipo_canasta"] == "Canasta Ofertada"].copy()
+    fig_px_ofertados = PlotlyChartFactory.build_product_basket_dashboard(
+        dash_data_all, "Canasta Ofertada"
     )
-    fig_px_demandados.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1][:52]))
-    fig_px_demandados.update_yaxes(matches=None, showticklabels=True)
+
+    # Plotly Interactivo 2: Desagregación de los 8 Productos Demandados con Slicer de Bloques/Anual
+    df_dem_anual = anual_prod[anual_prod["tipo_canasta"] == "Canasta Demandada (Referencia)"].copy()
+    fig_px_demandados = PlotlyChartFactory.build_product_basket_dashboard(
+        dash_data_all, "Canasta Demandada (Referencia)"
+    )
 
     # Figura Estática 1 (Grilla 4x2): Los 8 Productos Ofertados desagregados por año y país socio
     fig_of, axes_of = plt.subplots(4, 2, figsize=(15.5, 13.5))
@@ -781,20 +759,16 @@ def build_notebook(root_dir: Path) -> None:
                 "---\n",
                 "## Fase 6 CRISP-DM: Dashboard Analítico Interactivo con Plotly y Despliegue de Artefactos (*Deployment*)\n",
                 "\n",
-                "Se despliega un **Dashboard Analítico Interactivo con Plotly** en dos modalidades:\n",
-                "1. **Aplicación Web Autónoma Multi-Pestaña (`docs/dashboard_analitico_alianza_pacifico.html`)**: Incluye tarjetas KPI ejecutivas, explorador interactivo con menú desplegable (`dropdown`) y `rangeslider` para los **16 productos clave**, vistas conmutables por bloques temporales (`P1`, `P2`, `P3`) y series mensuales (`84 meses`), matriz de inferencia paramétrica/no paramétrica (`distfit`, $t$-Student, Wilcoxon, Kruskal-Wallis) y diagnóstico de modelos (`FE-OLS HC3` y *Double Machine Learning*).\n",
-                "2. **Widgets Interactivos Plotly Embebidos en el Cuaderno**: A continuación se renderizan directamente el **Explorador Individual de los 16 Productos con Dropdown y RangeSlider**, el **Tablero de Inferencia y Comercio Intraindustrial (`SCR` / `Grubel-Lloyd`)** y el **Tablero Econométrico y Causal (`FE-OLS` + `DML`)**.\n",
+                "Para garantizar **máxima legibilidad, claridad visual y ausencia de superposiciones**, el despliegue interactivo en el cuaderno se estructura en **tres bloques independientes a ancho completo**, complementados por la aplicación web autónoma multi-pestaña en `docs/dashboard_analitico_alianza_pacifico.html`:\n",
+                "1. **Sección 6.1 — Explorador Individual de los 16 Productos Clave (`Dropdown` Interactivo)**: Disposición vertical `2x1` a ancho completo que muestra en el panel superior la evolución mensual (`84` meses) por socio comercial (`Chile`, `México`, `Perú`) y en el panel inferior la distribución empírica horizontal (*Boxplot* + media).\n",
+                "2. **Sección 6.2 — Inferencia Estadística (`distfit` / Wilcoxon) y Mapa de Calor Bilateral (`SCR` y `Grubel-Lloyd`)**: Disposición vertical `2x1` de gran formato (`1240 px` de alto) donde cada gráfico ocupa el `100%` del ancho disponible sin colisión de etiquetas, mostrando los valores exactos de `SCR` en cada celda.\n",
+                "3. **Sección 6.3 — Tablero Econométrico (`FE-OLS HC3`) y Machine Learning Causal (`DML` + Importancia por Permutación)**: Cuadrícula `2x2` con nombres de variables estandarizados y espaciado ampliado (`horizontal_spacing = 0.26`, `vertical_spacing = 0.22`).\n",
                 "\n",
-                "### Artefactos Generados en `data/processed/` y `docs/`\n",
-                "* `docs/dashboard_analitico_alianza_pacifico.html` (Dashboard Analítico Interactivo completo en HTML5 + Plotly).\n",
-                "* `data/processed/panel_mensual_16_productos_ap.csv` (`4,032` registros mensuales por socio y producto).\n",
-                "* `data/processed/analisis_desagregado_productos_ap.csv` (Resumen bilateral por bloque de los 16 productos).\n",
-                "* `data/processed/distfit_16_productos_ap.csv` (Ajuste probabilístico `distfit` por cada uno de los 16 productos).\n",
-                "* `data/processed/pruebas_hipotesis_16_productos_ap.csv` (Pruebas $t$-pareada, Wilcoxon, Signos y Kruskal-Wallis por cada uno de los 16 productos).",
+                "### 6.1 Explorador Interactivo Individual por Producto (`Dropdown` de los 16 Complejos Arancelarios)",
             ],
         ),
         make_code_cell(
-            "plotly_dashboard_phase6",
+            "plotly_dashboard_phase6_1_explorer",
             [
                 "from src.alianza_pacifico.plotly_dashboard import (\n",
                 "    AnalyticalDashboardBuilder,\n",
@@ -809,11 +783,7 @@ def build_notebook(root_dir: Path) -> None:
                 "print(f'Dashboard Analítico HTML generado en: {html_out}')\n",
                 "\n",
                 "fig_dash_explorer = PlotlyChartFactory.build_product_drilldown_explorer(dash_data)\n",
-                "fig_dash_stats = PlotlyChartFactory.build_tab4_statistical_inference_and_distfit(dash_data)\n",
-                "fig_dash_models = PlotlyChartFactory.build_tab5_econometrics_and_causal_ml(dash_data)\n",
-                "fig_dash_explorer.show()\n",
-                "fig_dash_stats.show()\n",
-                "fig_dash_models.show()",
+                "fig_dash_explorer.show()",
             ],
             execution_count=6,
             stdout_text=(
@@ -823,9 +793,45 @@ def build_notebook(root_dir: Path) -> None:
                 PlotlyChartFactory.build_product_drilldown_explorer(
                     DashboardDataRepository(processed_dir).load_all()
                 ),
+            ],
+        ),
+        make_markdown_cell(
+            "md_phase6_2_stats",
+            [
+                "### 6.2 Inferencia Estadística (`distfit`, $P_1$ vs. $P_3$) y Mapa de Calor Bilateral (`SCR` / `Grubel-Lloyd`)\n",
+                "\n",
+                "El panel superior contrasta el flujo real mensual promedio entre $P_1$ (`2013–2014`) y $P_3$ (`2024–2025`) junto con la ley teórica óptima identificada por `distfit` y el $p$-valor de Wilcoxon. El panel inferior presenta la matriz completa de **Saldo Comercial Relativo ($SCR_{i,c,t} \\in [-1, +1]$)** con anotación numérica directa en cada celda.",
+            ],
+        ),
+        make_code_cell(
+            "plotly_dashboard_phase6_2_stats",
+            [
+                "fig_dash_stats = PlotlyChartFactory.build_tab4_statistical_inference_and_distfit(dash_data)\n",
+                "fig_dash_stats.show()",
+            ],
+            execution_count=7,
+            plotly_figs=[
                 PlotlyChartFactory.build_tab4_statistical_inference_and_distfit(
                     DashboardDataRepository(processed_dir).load_all()
                 ),
+            ],
+        ),
+        make_markdown_cell(
+            "md_phase6_3_models",
+            [
+                "### 6.3 Síntesis Visual de Econometría de Panel (`FE-OLS HC3`) y Machine Learning Causal (`Double Machine Learning`)\n",
+                "\n",
+                "Se integran en un lienzo espaciado los coeficientes con intervalos de confianza robustos (`HC3`), los efectos causales ortogonalizados de **Double Machine Learning ($\\hat{\\theta}_{\\text{DML}}$)**, la validación cruzada fuera de muestra (`5-Fold OOF` vs. `Walk-Forward TimeSeriesSplit`) y la importancia predictiva por permutación ($\\Delta R^2$).",
+            ],
+        ),
+        make_code_cell(
+            "plotly_dashboard_phase6_3_models",
+            [
+                "fig_dash_models = PlotlyChartFactory.build_tab5_econometrics_and_causal_ml(dash_data)\n",
+                "fig_dash_models.show()",
+            ],
+            execution_count=8,
+            plotly_figs=[
                 PlotlyChartFactory.build_tab5_econometrics_and_causal_ml(
                     DashboardDataRepository(processed_dir).load_all()
                 ),
