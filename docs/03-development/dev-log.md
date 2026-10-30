@@ -63,3 +63,11 @@
   - `HistGradientBoostingRegressor`: $R^2_{\text{OOF}} = 0.9228$, $\text{RMSE}_{\log} = 0.3019$, $\text{MAE}_{\log} = 0.2134$, $\text{MAPE} = 1.29\%$, $R^2_{\text{TimeSeriesSplit}} = 0.8633$.
   - `RandomForestRegressor`: $R^2_{\text{OOF}} = 0.9183$, $\text{RMSE}_{\log} = 0.3106$, $\text{MAE}_{\log} = 0.2216$, $\text{MAPE} = 1.33\%$, $R^2_{\text{TimeSeriesSplit}} = 0.8312$.
   - `Ridge Regression (FE)`: $R^2_{\text{OOF}} = 0.8569$, $\text{RMSE}_{\log} = 0.4111$, $\text{MAE}_{\log} = 0.2958$, $\text{MAPE} = 1.78\%$, $R^2_{\text{TimeSeriesSplit}} = 0.8299$.
+
+---
+
+## 5. Gestión de Dependencias y Configuración de Entorno (`.env` y `requirements.txt`)
+
+- **Especificación de Dependencias (`requirements.txt`)**: Generado con versiones exactas y reproducibles divididas en 7 capas funcionales (Procesamiento Tabular/Binario `.dta`, Inferencia Estadística y Econometría, Machine Learning Predictivo/Causal, Visualización Interactiva y EDA, Configuración `.env`, Ecosistema Jupyter y Calidad/Pruebas).
+- **Variables de Entorno (`.env` y `.env.example`)**: Parametrización completa de rutas DAMA-BOK, catálogos DANE ANDA (`473` y `856`), hiperparámetros econométricos/DML y motores gráficos para prevenir el antipatrón *Hard Coding*.
+- **Cargador Tipado (`src/config.py`)**: Implementación de `AppConfig` (`@dataclass(frozen=True)`) aplicando el patrón GRASP *Protected Variations* y el principio SOLID de Responsabilidad Única (SRP) mediante `python-dotenv`.

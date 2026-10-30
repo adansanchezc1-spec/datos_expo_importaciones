@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
+import src.config  # noqa: F401 - Carga .env y MPLCONFIGDIR antes de importar matplotlib
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -360,7 +361,7 @@ def build_notebook(root_dir: Path) -> None:
     axes_eda[0].boxplot(
         of_boxes,
         vert=False,
-        labels=[p[:42] for p in PRODUCTOS_OFERTADOS_LIST[::-1]],
+        tick_labels=[p[:42] for p in PRODUCTOS_OFERTADOS_LIST[::-1]],
         patch_artist=True,
         boxprops=dict(facecolor="#a6cee3", edgecolor="#1f78b4"),
     )
@@ -374,7 +375,7 @@ def build_notebook(root_dir: Path) -> None:
     axes_eda[1].boxplot(
         dem_boxes,
         vert=False,
-        labels=[p[:42] for p in PRODUCTOS_DEMANDADOS_LIST[::-1]],
+        tick_labels=[p[:42] for p in PRODUCTOS_DEMANDADOS_LIST[::-1]],
         patch_artist=True,
         boxprops=dict(facecolor="#fdbf6f", edgecolor="#ff7f00"),
     )

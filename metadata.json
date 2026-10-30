@@ -4,8 +4,12 @@
   "pdco_phase": "CONTROL",
   "active_skill": "03-development",
   "sdlc_stage": "implementation",
-  "last_updated": "2026-10-29",
+  "last_updated": "2026-10-30",
   "artifacts": [
+    ".env",
+    ".env.example",
+    "requirements.txt",
+    "src/config.py",
     "src/data_ingestion/unzip_exporter.py",
     "src/data_ingestion/dane_impo_downloader.py",
     "src/data_ingestion/unzip_importer.py",
